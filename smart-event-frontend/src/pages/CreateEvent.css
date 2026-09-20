@@ -1,0 +1,37 @@
+.create-event-page {
+  flex: 1;
+  padding: var(--space-2xl) var(--space-xl);
+}
+
+.create-event-card {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: var(--space-2xl);
+  animation: fadeInUp 0.5s ease;
+}
+
+.create-event-header {
+  margin-bottom: var(--space-2xl);
+}
+
+.create-event-header h1 {
+  font-size: var(--font-size-2xl);
+  margin-bottom: var(--space-sm);
+}
+
+.create-event-header p {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.create-event-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+}
+
+@media (max-width: 480px) {
+  .create-event-row {
+    grid-template-columns: 1fr;
+  }
+}

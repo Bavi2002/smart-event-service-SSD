@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  user-service:
+    build: .
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - MONGO_URI=mongodb://mongo:27017/smart-event-db
+      - JWT_SECRET=super_long_random_secret_change_this_2026_very_important
+      - JWT_EXPIRES_IN=1h
+    depends_on:
+      - mongo
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  mongo:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: smart-event-db
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:

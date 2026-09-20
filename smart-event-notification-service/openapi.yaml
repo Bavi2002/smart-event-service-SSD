@@ -1,0 +1,15 @@
+openapi: 3.0.0
+info:
+  title: Smart Event [Your Service] Service API
+  version: 1.0.0
+  description: Microservice for [Your Service Name]
+servers:
+  - url: https://your-service-url.on.aws/api
+paths:
+  # We will auto-fill this in Step 3
+  /health:
+    get:
+      summary: Health check
+      responses:
+        "200":
+          description: OK

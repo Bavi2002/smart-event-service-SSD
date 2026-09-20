@@ -1,0 +1,77 @@
+.notifications-page {
+  flex: 1;
+  padding: var(--space-2xl) var(--space-xl);
+  max-width: var(--max-width);
+  margin: 0 auto;
+  width: 100%;
+}
+
+.notifications-header {
+  margin-bottom: var(--space-2xl);
+}
+
+.notifications-header h1 {
+  font-size: var(--font-size-3xl);
+  margin-bottom: var(--space-sm);
+}
+
+.notifications-header p {
+  color: var(--color-text-muted);
+}
+
+.notifications-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.notification-item {
+  padding: var(--space-lg);
+  display: flex;
+  gap: var(--space-lg);
+  align-items: flex-start;
+}
+
+.notification-icon {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xl);
+  flex-shrink: 0;
+}
+
+.notification-icon.booking {
+  background: #e8eaed;
+}
+
+.notification-icon.reminder {
+  background: #e6f4ea;
+}
+
+.notification-icon.default {
+  background: var(--color-bg-tertiary);
+}
+
+.notification-content {
+  flex: 1;
+}
+
+.notification-subject {
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 4px;
+}
+
+.notification-to {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-sm);
+}
+
+.notification-date {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
