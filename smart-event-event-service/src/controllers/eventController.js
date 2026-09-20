@@ -59,7 +59,12 @@ const updateEvent = async (req, res) => {
     if (event.organizerId !== (req.user.id || req.user.userId)) {
       return res.status(403).json({ message: "Not authorized" });
     }
-    Object.assign(event, req.body);
+    const allowedFields = ["title", "description", "date", "location", "capacity"];
+    const allowedUpdates = {};
+    allowedFields.forEach(field => {
+      if (req.body[field] !== undefined) allowedUpdates[field] = req.body[field];
+    });
+    Object.assign(event, allowedUpdates);
     await event.save();
     res.json({ message: "Event updated", event });
   } catch (err) {
