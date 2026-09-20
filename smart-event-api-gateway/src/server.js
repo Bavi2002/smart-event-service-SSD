@@ -25,7 +25,7 @@ const NOTIFICATION_SERVICE_URL =
 app.use(helmet());
 app.use(
   cors({
-    origin: "*", // In production, restrict to your frontend domain
+    origin: process.env.FRONTEND_URL || "http://localhost:5173", // Restrict to frontend domain
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
