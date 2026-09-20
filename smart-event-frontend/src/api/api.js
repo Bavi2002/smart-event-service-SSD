@@ -66,6 +66,13 @@ export const userApi = {
     });
   },
 
+  loginWithGoogle(credential) {
+    return request('/api/users/oauth/google', {
+      method: 'POST',
+      body: JSON.stringify({ credential }),
+    });
+  },
+
   getProfile() {
     return request('/api/users/profile');
   },

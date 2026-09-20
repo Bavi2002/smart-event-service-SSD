@@ -1,5 +1,7 @@
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
+const { OAuth2Client } = require('google-auth-library');
+const client = new OAuth2Client("815914039679-v21m7fq079640d572rblh0n8kgh2vp00.apps.googleusercontent.com");
 
 const generateToken = (id, email, role) => {
   return jwt.sign({ id, email, role }, process.env.JWT_SECRET, {
@@ -103,9 +105,49 @@ const updateUserProfile = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
+const googleOAuthLogin = async (req, res) => {
+  const { credential } = req.body;
+  try {
+    const ticket = await client.verifyIdToken({
+      idToken: credential,
+      audience: "815914039679-v21m7fq079640d572rblh0n8kgh2vp00.apps.googleusercontent.com",
+    });
+    const payload = ticket.getPayload();
+
+    if (!payload || !payload.email) {
+      return res.status(400).json({ error: "Invalid Google token" });
+    }
+
+    let user = await User.findOne({ email: payload.email });
+    if (!user) {
+      user = await User.create({
+        name: payload.name,
+        email: payload.email,
+        password: "OAUTH_LOGIN_PLACEHOLDER_PASSWORD_123!" 
+      });
+    }
+
+    const token = generateToken(user._id, user.email, user.role);
+
+    res.json({
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+      },
+      token,
+    });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
   getUserProfile,
   updateUserProfile,
+  googleOAuthLogin,
 };

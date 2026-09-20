@@ -2,11 +2,12 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Lock } from 'lucide-react';
+import { GoogleLogin } from '@react-oauth/google';
 import Loader from '../components/Loader';
 import './Login.css';
 
 export default function Login() {
-  const { login } = useAuth();
+  const { login, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
@@ -78,12 +79,30 @@ export default function Login() {
           <button
             type="submit"
             className="btn btn-primary"
-            style={{ width: '100%' }}
+            style={{ width: '100%', marginBottom: '1rem' }}
             disabled={loading}
             id="login-submit"
           >
             {loading ? <Loader small /> : 'Sign In'}
           </button>
+
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+            <GoogleLogin
+              onSuccess={async (credentialResponse) => {
+                setError('');
+                try {
+                  await loginWithGoogle(credentialResponse.credential);
+                  navigate('/events');
+                } catch (err) {
+                  setError(err.message || 'Google Login failed.');
+                }
+              }}
+              onError={() => {
+                setError('Google Login failed.');
+              }}
+              useOneTap
+            />
+          </div>
         </form>
 
         <div className="auth-footer">

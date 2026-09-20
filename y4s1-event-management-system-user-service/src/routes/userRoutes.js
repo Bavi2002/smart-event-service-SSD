@@ -6,6 +6,7 @@ const {
   loginUser,
   getUserProfile,
   updateUserProfile,
+  googleOAuthLogin,
 } = require("../controllers/userController");
 const { protect, validateTokenForServices } = require("../middleware/auth");
 
@@ -62,6 +63,9 @@ router.post(
   ],
   loginUser,
 );
+
+// Google OAuth Login
+router.post("/users/oauth/google", googleOAuthLogin);
 
 // Profile Routes
 router.get("/users/profile", protect, getUserProfile);
