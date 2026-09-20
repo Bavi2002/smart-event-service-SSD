@@ -24,7 +24,7 @@ router.route('/:id')
   .delete(protect, cancelRegistration);
 
 router.route('/event/:eventId')
-  .get(getEventParticipants);
+  .get(protect, getEventParticipants);
 
 router.route('/health')
   .get(healthCheck);
