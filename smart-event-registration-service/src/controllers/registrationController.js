@@ -84,6 +84,15 @@ export const getEventParticipants = async (req, res) => {
   try {
     const { eventId } = req.params;
 
+    // IDOR Protection: Check if requester is the organizer
+    const event = await getEventDetails(eventId);
+    if (!event) {
+      return res.status(404).json({ message: "Event not found" });
+    }
+    if (event.organizerId !== (req.user.id || req.user.userId)) {
+      return res.status(403).json({ message: "Forbidden: You are not the organizer of this event" });
+    }
+
 
     const participants = await Registration.find({
       eventId,
