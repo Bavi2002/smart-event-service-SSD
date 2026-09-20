@@ -98,6 +98,27 @@ const checkAvailability = async (req, res) => {
   }
 };
 
+// Atomic booking to fix TOCTOU Race Condition in Registration Service
+const bookCapacity = async (req, res) => {
+  try {
+    const { ticketCount } = req.body;
+    // Atomically find event with enough capacity and decrement it
+    const event = await Event.findOneAndUpdate(
+      { _id: req.params.id, capacity: { $gte: ticketCount } },
+      { $inc: { capacity: -ticketCount } },
+      { new: true }
+    );
+    
+    if (!event) {
+      return res.status(400).json({ message: "Not enough capacity or event not found" });
+    }
+    
+    res.json({ message: "Capacity booked successfully", remaining: event.capacity, eventId: event._id });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 export {
   createEvent,
   getAllEvents,
@@ -105,4 +126,5 @@ export {
   updateEvent,
   deleteEvent,
   checkAvailability,
+  bookCapacity,
 };

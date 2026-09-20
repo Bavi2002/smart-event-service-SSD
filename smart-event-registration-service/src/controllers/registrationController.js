@@ -1,6 +1,6 @@
 import Registration from "../models/Registration.js";
 import { sendBookingConfirmation } from "../utils/notificationServiceClient.js";
-import { checkEventAvailability, getEventDetails, updateEventCapacity } from "../utils/eventServiceClient.js";
+import { getEventDetails, bookEventTickets } from "../utils/eventServiceClient.js";
 
 export const createRegistration = async (req, res) => {
   try {
@@ -18,14 +18,7 @@ export const createRegistration = async (req, res) => {
 
     const token = req.headers.authorization?.split(" ")[1];
 
-    // 1. Check availability from Event Service
-    const { available } = await checkEventAvailability(eventId);
-
-    if (available < ticketCount) {
-      return res.status(400).json({
-        message: `Only ${available} spots remaining`,
-      });
-    }
+    // 1. We will atomically book capacity further below
 
     // 2. Get event details (for title)
     const event = await getEventDetails(eventId);
@@ -42,7 +35,10 @@ export const createRegistration = async (req, res) => {
         message: "You already booked this event",
       });
     }
-    // 4. Create registration
+    // 4. Atomically book capacity from Event Service to prevent TOCTOU
+    const bookingRes = await bookEventTickets(eventId, ticketCount, token);
+
+    // 5. Create registration
     const registration = await Registration.create({
       userEmail: req.user.email,
       eventId,
@@ -53,17 +49,13 @@ export const createRegistration = async (req, res) => {
       bookedAt: new Date(),
     });
 
-    // 5. Send notification (non-blocking)
+    // 6. Send notification (non-blocking)
     await sendBookingConfirmation(registration, token);
-
-    const newCapacity = available - ticketCount;
-
-    await updateEventCapacity(eventId, newCapacity, token);
 
     res.status(201).json({
       message: "Booking confirmed",
       registration,
-      remainingSpots: newCapacity,
+      remainingSpots: bookingRes.remaining,
     });
   } catch (error) {
     console.error("Booking failed:", error);

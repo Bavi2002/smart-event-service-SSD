@@ -31,20 +31,23 @@ export const getEventDetails = async (eventId) => {
   }
 };
 
-export const updateEventCapacity = async (eventId, newCapacity, token) => {
+export const bookEventTickets = async (eventId, ticketCount, token) => {
   try {
     const config = token
       ? { headers: { Authorization: `Bearer ${token}` } }
       : {};
 
     const res = await axios.put(
-      `${EVENT_SERVICE_BASE}/${eventId}`,
-      { capacity: newCapacity },
+      `${EVENT_SERVICE_BASE}/${eventId}/book`,
+      { ticketCount },
       config,
     );
     return res.data;
   } catch (err) {
-    console.error("Update event failed:", err.message);
-    throw new Error("Failed to update event capacity");
+    if (err.response?.status === 400) {
+      throw new Error(err.response.data.message || "Not enough capacity");
+    }
+    console.error("Book event failed:", err.message);
+    throw new Error("Failed to book event capacity");
   }
 };

@@ -8,6 +8,7 @@ import {
   updateEvent,
   deleteEvent,
   checkAvailability,
+  bookCapacity,
 } from "../controllers/eventController.js";
 
 const router = Router();
@@ -20,6 +21,7 @@ router.get("/:id/availability", checkAvailability);
 // Protected routes
 router.post("/", authMiddleware, validateEvent, createEvent);
 router.put("/:id", authMiddleware, validateEvent, updateEvent);
+router.put("/:id/book", authMiddleware, bookCapacity);
 router.delete("/:id", authMiddleware, deleteEvent);
 
 export default router;
