@@ -1,11 +1,11 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { userApi } from '../api/api';
+import { userApi, setAuthToken, clearAuthToken } from '../api/api';
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('token'));
+  const [token, setToken] = useState(null); // Changed from localStorage.getItem('token')
   const [loading, setLoading] = useState(true);
 
   // On mount, try to restore session
@@ -20,7 +20,7 @@ export function AuthProvider({ children }) {
         setUser(profile);
       } catch {
         // Token is invalid, clear it
-        localStorage.removeItem('token');
+        clearAuthToken();
         setToken(null);
         setUser(null);
       } finally {
@@ -32,7 +32,7 @@ export function AuthProvider({ children }) {
 
   const login = async (email, password) => {
     const data = await userApi.login(email, password);
-    localStorage.setItem('token', data.token);
+    setAuthToken(data.token);
     setToken(data.token);
     setUser(data.user);
     return data;
@@ -40,14 +40,14 @@ export function AuthProvider({ children }) {
 
   const register = async (name, email, password, phone) => {
     const data = await userApi.register(name, email, password, phone);
-    localStorage.setItem('token', data.token);
+    setAuthToken(data.token);
     setToken(data.token);
     setUser(data.user);
     return data;
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
+    clearAuthToken();
     setToken(null);
     setUser(null);
   };

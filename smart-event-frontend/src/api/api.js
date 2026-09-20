@@ -7,8 +7,18 @@ const API_BASE = 'http://localhost:3005';  // API Gateway
 
 // ---- Helpers ----
 
+let inMemoryToken = null;
+
+export function setAuthToken(token) {
+  inMemoryToken = token;
+}
+
+export function clearAuthToken() {
+  inMemoryToken = null;
+}
+
 function getToken() {
-  return localStorage.getItem('token');
+  return inMemoryToken;
 }
 
 async function request(url, options = {}) {
