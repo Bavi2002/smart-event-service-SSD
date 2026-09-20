@@ -28,7 +28,10 @@ const getAllEvents = async (req, res) => {
   try {
     const { search, date } = req.query;
     let query = {};
-    if (search) query.title = { $regex: search, $options: "i" };
+    if (search) {
+      const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      query.title = { $regex: escapedSearch, $options: "i" };
+    }
     if (date) query.date = { $gte: new Date(date) };
     const events = await Event.find(query).sort({ date: 1 });
     res.json(events);
