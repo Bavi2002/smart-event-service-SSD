@@ -13,6 +13,12 @@ const generateToken = (id, email, role) => {
 const registerUser = async (req, res) => {
   const { name, email, password, phone } = req.body;
 
+  // Fix 8: Weak Password Policy Enforced
+  const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
+  if (!passwordRegex.test(password)) {
+    return res.status(400).json({ error: "Password must be at least 8 characters and contain numbers and special characters" });
+  }
+
   try {
     const userExists = await User.findOne({ email });
     if (userExists) {
@@ -46,6 +52,11 @@ const registerUser = async (req, res) => {
 const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
+  // Fix 10: Prevent NoSQL Injection
+  if (typeof email !== "string" || typeof password !== "string") {
+    return res.status(400).json({ error: "Invalid input format" });
+  }
+
   try {
     const user = await User.findOne({ email }).select("+password");
 
@@ -63,6 +74,8 @@ const loginUser = async (req, res) => {
         token,
       });
     } else {
+      // Fix 12: Add Security Audit Logging for failed attempts
+      console.warn(`[SECURITY AUDIT] Failed login attempt for email: ${email} from IP: ${req.ip}`);
       res.status(401).json({ error: "Invalid email or password" });
     }
   } catch (error) {
@@ -78,7 +91,9 @@ const getUserProfile = async (req, res) => {
     }
     res.json(user);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    // Fix 9: Prevent Information Leakage (hiding stack trace)
+    console.error("[ERROR]", error);
+    res.status(500).json({ error: "An internal server error occurred" });
   }
 };
 
