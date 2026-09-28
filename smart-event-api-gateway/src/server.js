@@ -4,7 +4,7 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import dotenv from "dotenv";
-import rateLimit from "express-rate-limit";
+
 import { createServiceProxy } from "./proxy.js";
 
 dotenv.config();
@@ -29,18 +29,9 @@ app.use(
     origin: process.env.FRONTEND_URL || "http://localhost:5173", // Restrict to frontend domain
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-  })
+  }),
 );
 app.use(morgan("dev"));
-
-// Fix 11: Security Misconfiguration - Missing Rate Limiting
-// Prevents Brute Force and DDoS attacks
-const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per window
-  message: { error: "Too many requests from this IP, please try again after 15 minutes" }
-});
-app.use("/api/", apiLimiter);
 
 // ─── Proxy routes ───────────────────────────────────────────────────────────
 // The User Service mounts its routes under /api (e.g., app.use("/api", userRoutes))
@@ -50,27 +41,21 @@ app.use("/api/", apiLimiter);
 // so paths pass through unchanged.
 
 // User Service — /api/users/*
-app.use(
-  "/api/users",
-  createServiceProxy("User Service", USER_SERVICE_URL)
-);
+app.use("/api/users", createServiceProxy("User Service", USER_SERVICE_URL));
 
 // Event Service — /api/events/*
-app.use(
-  "/api/events",
-  createServiceProxy("Event Service", EVENT_SERVICE_URL)
-);
+app.use("/api/events", createServiceProxy("Event Service", EVENT_SERVICE_URL));
 
 // Registration Service — /api/registrations/*
 app.use(
   "/api/registrations",
-  createServiceProxy("Registration Service", REGISTRATION_SERVICE_URL)
+  createServiceProxy("Registration Service", REGISTRATION_SERVICE_URL),
 );
 
 // Notification Service — /api/notifications/*
 app.use(
   "/api/notifications",
-  createServiceProxy("Notification Service", NOTIFICATION_SERVICE_URL)
+  createServiceProxy("Notification Service", NOTIFICATION_SERVICE_URL),
 );
 
 // ─── Health aggregation endpoint ────────────────────────────────────────────
@@ -100,16 +85,24 @@ app.get("/health", async (req, res) => {
           const data = await response.json();
           return { name: service.name, status: "healthy", data };
         }
-        return { name: service.name, status: "unhealthy", code: response.status };
+        return {
+          name: service.name,
+          status: "unhealthy",
+          code: response.status,
+        };
       } catch (err) {
         clearTimeout(timeout);
-        return { name: service.name, status: "unreachable", error: err.message };
+        return {
+          name: service.name,
+          status: "unreachable",
+          error: err.message,
+        };
       }
-    })
+    }),
   );
 
   const serviceStatuses = results.map((r) =>
-    r.status === "fulfilled" ? r.value : { status: "error" }
+    r.status === "fulfilled" ? r.value : { status: "error" },
   );
 
   const allHealthy = serviceStatuses.every((s) => s.status === "healthy");
