@@ -4,6 +4,7 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import dotenv from "dotenv";
+import rateLimit from "express-rate-limit";
 
 import { createServiceProxy } from "./proxy.js";
 
@@ -32,6 +33,17 @@ app.use(
   }),
 );
 app.use(morgan("dev"));
+
+// Fix 12: Security Misconfiguration - Missing Rate Limiting
+// Prevents brute-force and DDoS attacks.
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per window
+  message: {
+    error: "Too many requests from this IP, please try again after 15 minutes",
+  },
+});
+app.use("/api/", apiLimiter);
 
 // ─── Proxy routes ───────────────────────────────────────────────────────────
 // The User Service mounts its routes under /api (e.g., app.use("/api", userRoutes))
