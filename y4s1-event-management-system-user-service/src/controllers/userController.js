@@ -52,11 +52,6 @@ const registerUser = async (req, res) => {
 const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
-  // Fix 10: Prevent NoSQL Injection
-  if (typeof email !== "string" || typeof password !== "string") {
-    return res.status(400).json({ error: "Invalid input format" });
-  }
-
   try {
     const user = await User.findOne({ email }).select("+password");
 
@@ -74,8 +69,6 @@ const loginUser = async (req, res) => {
         token,
       });
     } else {
-      // Fix 12: Add Security Audit Logging for failed attempts
-      console.warn(`[SECURITY AUDIT] Failed login attempt for email: ${email} from IP: ${req.ip}`);
       res.status(401).json({ error: "Invalid email or password" });
     }
   } catch (error) {
