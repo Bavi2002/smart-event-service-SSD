@@ -52,6 +52,11 @@ const registerUser = async (req, res) => {
 const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
+  // Fix 10: Prevent NoSQL Injection
+  if (typeof email !== "string" || typeof password !== "string") {
+    return res.status(400).json({ error: "Invalid input format" });
+  }
+
   try {
     const user = await User.findOne({ email }).select("+password");
 
