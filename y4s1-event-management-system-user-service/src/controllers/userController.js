@@ -74,6 +74,8 @@ const loginUser = async (req, res) => {
         token,
       });
     } else {
+      // Fix 11: Add Security Audit Logging for failed attempts
+      console.warn(`[SECURITY AUDIT] Failed login attempt for email: ${email} from IP: ${req.ip}`);
       res.status(401).json({ error: "Invalid email or password" });
     }
   } catch (error) {
